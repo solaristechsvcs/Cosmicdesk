@@ -1,20 +1,22 @@
 # CosmicDesk
 
-CosmicDesk is a cosmic-themed customer support and helpdesk platform.
+Cosmic-themed customer support and helpdesk application using Node.js and MySQL.
 
-## Planned features
-- Customer registration, login, profile and ticket history
-- Ticket creation, priorities, departments, attachments, assignment, replies, internal notes, closure and reopening
-- Staff dashboard, queues, canned responses and role-based access
-- Administrator dashboard for customers, staff, roles, departments and settings
-- Audit logs, reports, notifications and knowledge base
+## Implemented
+- Registered customer accounts, secure password hashing and login
+- Guest ticket creation with a private, randomly generated ticket URL
+- Departments, ticket priorities, replies and ticket status
+- Staff ticket queue, internal notes, status changes and basic dashboard
+- Cosmic-themed responsive frontend
 
-## Architecture
-- Node.js backend
-- MySQL database
-- Production deployment in Docker/Wisp
-- `config.js` configuration (secrets should remain uncommitted)
-- Responsive cosmic-themed frontend
+## Deploy on Wisp
+1. Provision a MySQL database and import `schema.sql`.
+2. Copy `config.example.js` to `config.js`; set MySQL details, allocated port, and a long random session secret.
+3. Run `npm install` and start with `node server.js` (MAIN_FILE: `server.js`).
+4. Visit `/health` to verify the database connection.
+5. To bootstrap an admin, register your account and run `UPDATE users SET role='admin' WHERE email='your-email@example.com';` in MySQL.
 
-## Status
-Initial project specification. Application implementation and deployment are not yet complete.
+## Important
+This is an early MVP, not yet ready for public production use. Before launch add rate limiting, spam protection, account recovery, email verification, email delivery, trusted-proxy and secure-cookie configuration, tests and monitoring. Guest customers must save their ticket URL: email delivery and lost-link recovery are not implemented. Ticket attachments, staff assignment, account administration, knowledge base, and detailed analytics remain on the roadmap.
+
+Never commit `config.js` or credentials.
