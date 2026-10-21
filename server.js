@@ -12,13 +12,14 @@ const pool = mysql.createPool({ ...config.mysql, waitForConnections: true, conne
 const MySQLStore = MySQLStoreFactory(session);
 const store = new MySQLStore({ ...config.mysql, createDatabaseTable: true });
 const app = express();
-const upload = multer({storage:multer.memoryStorage(),limits:{fileSize:5*1024*1024,files:1},fileFilter:(req,file,cb)=>cb(null,['image/png','image/jpeg','image/webp','application/pdf','text/plain'].includes(file.mimetype))});
+const upload = multer({storage:multer.memoryStorage(),limits:{fileSize:5*1024*1024,files:1},fileFilter:(req,file,cb)=>['image/png','image/jpeg','image/webp','application/pdf','text/plain'].includes(file.mimetype)?cb(null,true):cb(new Error('Unsupported attachment type'))});
 app.disable('x-powered-by');
 app.use(express.urlencoded({ extended: false, limit: '64kb' }));
 app.use(express.json({ limit: '64kb' }));
 app.use((req,res,next)=>req.is('multipart/form-data')?upload.single('attachment')(req,res,next):next());
 app.use(session({ name:'cosmicdesk.sid', secret:config.sessionSecret, store, resave:false, saveUninitialized:false, cookie:{httpOnly:true,secure:process.env.NODE_ENV==='production',sameSite:'lax',maxAge:86400000} }));
 app.use(express.static('public'));
+app.use(async(req,res,next)=>{try{if(req.session.user){const [user]=(await pool.execute('SELECT id,name,role FROM users WHERE id=?',[req.session.user.id]))[0];if(!user){return req.session.destroy(()=>res.status(401).send('Account unavailable'));}req.session.user={id:user.id,name:user.name,role:user.role};}next();}catch(e){next(e);}});
 const q = async (sql,params=[]) => (await pool.execute(sql,params))[0];
 const hash = s => crypto.createHash('sha256').update(s).digest('hex');
 const clean = s => String(s??'').trim();
@@ -59,6 +60,6 @@ app.post('/admin/departments',requireAdmin,route(async(req,res)=>{const name=cle
 app.post('/tickets/:id/assign',requireStaff,route(async(req,res)=>{const id=req.body.staff_id||null;if(id){const [u]=await q("SELECT id FROM users WHERE id=? AND role IN ('staff','admin')",[id]);if(!u)return fail(res,req,'Invalid staff member');}await q('UPDATE tickets SET assigned_to=? WHERE id=?',[id,req.params.id]);await q('INSERT INTO audit_logs (actor_id,action,ticket_id) VALUES (?,?,?)',[req.session.user.id,'assign:'+(id||'none'),req.params.id]);res.redirect('/tickets/'+req.params.id);}));
 app.post('/tickets/:id/status',requireStaff,route(async(req,res)=>{if(!statuses.includes(req.body.status))return fail(res,req,'Invalid status');await q('UPDATE tickets SET status=? WHERE id=?',[req.body.status,req.params.id]);await q('INSERT INTO audit_logs (actor_id,action,ticket_id) VALUES (?,?,?)',[req.session.user.id,'status:'+req.body.status,req.params.id]);res.redirect('/tickets/'+req.params.id);}));
 app.get('/admin',requireStaff,route(async(req,res)=>{const [tickets]=await q('SELECT COUNT(*) total, SUM(status="open") open_count FROM tickets');const [customers]=await q('SELECT COUNT(*) total FROM users');res.send(page(req,'Support dashboard',`<article><h2>${tickets.total} tickets · ${tickets.open_count||0} open</h2><p>${customers.total} registered accounts</p><a href="/tickets">View ticket queue</a> · <a href="/admin/users">Manage users</a> · <a href="/admin/departments">Departments</a></article>`));}));
-app.use((err,req,res,next)=>{console.error(err);res.status(500).send(page(req,'Server error','<p>Something went wrong. Check the server logs.</p>'));});
+app.use((err,req,res,next)=>{console.error(err);if(err instanceof multer.MulterError||err.message==='Unsupported attachment type')return res.status(400).send(page(req,'Upload rejected','<p>Attachment rejected. Maximum 5 MB; PNG, JPEG, WebP, PDF, or plain text only.</p>'));res.status(500).send(page(req,'Server error','<p>Something went wrong. Check the server logs.</p>'));});
 await q('SELECT 1');
 app.listen(config.port,config.host||'0.0.0.0',()=>console.log('CosmicDesk listening on '+(config.host||'0.0.0.0')+':'+config.port));
