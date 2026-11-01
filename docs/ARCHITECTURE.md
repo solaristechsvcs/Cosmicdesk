@@ -1,0 +1,11 @@
+# Architecture and access policy
+
+`server.js` owns validated configuration, MySQL pool, persistent session store, startup and shutdown. `src/app.js` is an injectable Express application factory with the customer portal, staff workspace and admin routes. `src/access.js` centralizes role checks, ticket access, token hashing and CSRF tokens. `src/views.js` renders escaped server-side HTML and forms. `public/style.css` supplies responsive cosmic styling without a frontend build. `src/migrate.js` applies tracked SQL migrations under a database advisory lock.
+
+The existing relational tables remain the baseline: users, departments, tickets, messages, attachments and audit events. Migration 002 adds help topics, staff membership, settings and the queue index. Topic routing is copied to each ticket on submission; later topic edits do not silently transfer existing tickets. Old tickets may have no topic and remain readable. Attachment bytes remain in MySQL, so database backups include uploads.
+
+Customers can read/reply only to their own tickets. Guests need the private token for the specific ticket; knowing a number/email does not grant access. Staff access only departments in their membership; administrators access all. Staff membership is checked on every request, including downloads and direct POSTs. All authorized staff in a department can assign and operate its tickets. A department transfer can hand a ticket outside the acting staff member's access, then returns to the queue. Internal messages are filtered in SQL and attachments inherit message visibility.
+
+Request order: security headers and basic limits, parsers/upload bounds, persistent sessions, current user refresh, CSRF validation, membership/settings load, routes, safe errors. Prepared statements carry input values. Ticket/message/attachment creation and reply operations are transactional; routing and membership updates are transactional. Status/assignment and their audit inserts are separate operations, so an audit-write failure can leave the ticket updated. Resolving that gap and concurrent last-write-wins ticket editing is future work.
+
+This is a single Node service plus MySQL deployment. Memory session storage is used only by request tests; production startup always supplies the MySQL store. No hard-coded admin account or password is shipped.

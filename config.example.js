@@ -1,9 +1,10 @@
-// Copy to config.js on Wisp. Do not commit config.js or real credentials.
+// Copy to config.js. Keep real credentials outside version control.
 export default {
-  port: 3014,
-  host: "0.0.0.0",
-  sessionSecret: "REPLACE_WITH_A_LONG_RANDOM_SECRET",
-  mysql: { host: "127.0.0.1", port: 3306, user: "cosmicdesk", password: "REPLACE_ME", database: "cosmicdesk" },
-  // Set this to the public HTTPS origin for links in emails later.
-  publicUrl: "https://desk.example.com"
+ port: Number(process.env.PORT || 3014), host: '0.0.0.0',
+ sessionSecret: process.env.SESSION_SECRET || 'REPLACE_WITH_32_OR_MORE_RANDOM_CHARACTERS',
+ mysql: {host: process.env.DB_HOST || '127.0.0.1', port: Number(process.env.DB_PORT || 3306), user: process.env.DB_USER || 'cosmicdesk', password: process.env.DB_PASSWORD || 'REPLACE_ME', database: process.env.DB_NAME || 'cosmicdesk'},
+ publicUrl: process.env.PUBLIC_URL || 'http://localhost:3014',
+ // Set true behind one trusted HTTPS reverse proxy; never expose that backend directly.
+ trustProxy: process.env.TRUST_PROXY === '1' ? 1 : false,
+ secureCookies: process.env.NODE_ENV === 'production'
 };
