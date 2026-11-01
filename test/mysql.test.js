@@ -50,11 +50,13 @@ test(
         const r = await agent.get(path).expect(200);
         return r.text.match(/name="_csrf" value="([a-f0-9]+)"/)[1];
       };
-      const post = async (agent, path, data, page = "/login") =>
-        agent
+      const post = async (agent, path, data, page = "/login") => {
+        const _csrf = await token(agent, page);
+        return agent
           .post(path)
           .type("form")
-          .send({ _csrf: await token(agent, page), ...data });
+          .send({ _csrf, ...data });
+      };
       for (const [agent, email] of [
         [admin, "admin1"],
         [staff, "staff2"],
@@ -197,6 +199,22 @@ test(
         (await post(customer, path + "/reply", { body: "reopen?" })).status,
         400,
       );
+      assert.equal(
+        (
+          await post(admin, path + "/routing", {
+            department_id: "3",
+            priority: "urgent",
+          })
+        ).status,
+        302,
+      );
+      const [[routed]] = await pool.query(
+        "SELECT department_id,priority,assigned_to FROM tickets WHERE id=?",
+        [path.split("/").pop()],
+      );
+      assert.equal(routed.department_id, 3);
+      assert.equal(routed.priority, "urgent");
+      assert.equal(routed.assigned_to, null);
       const [[counts]] = await pool.query("SELECT COUNT(*) count FROM tickets");
       assert.equal(counts.count, 3);
     } finally {

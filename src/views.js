@@ -11,8 +11,14 @@ export const esc = (s) =>
         "'": "&#39;",
       })[c],
   );
-export const field = (label, name, type = "text", required = true) =>
-  `<label>${esc(label)}<input name="${name}" type="${type}" ${required ? "required" : ""}></label>`;
+export const field = (
+  label,
+  name,
+  type = "text",
+  required = true,
+  value = "",
+) =>
+  `<label>${esc(label)}<input name="${name}" type="${type}" value="${esc(value)}" ${required ? "required" : ""}></label>`;
 export const form = (req, action, body, multipart = false) =>
   `<form method="post" action="${action}" ${multipart ? 'enctype="multipart/form-data"' : ""}><input type="hidden" name="_csrf" value="${csrf(req)}">${body}<button>Submit</button></form>`;
 export const page = (req, title, body) =>

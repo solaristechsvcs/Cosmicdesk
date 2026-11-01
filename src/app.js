@@ -886,7 +886,7 @@ export function createApp({ config, pool, store }) {
       const topics = await q("SELECT * FROM help_topics ORDER BY id"),
         deps = await q("SELECT * FROM departments ORDER BY name");
       const fields = (t) =>
-        field("Name", "name") +
+        field("Name", "name", "text", true, t?.name || "") +
         '<label>Department<select name="department_id">' +
         deps
           .map(
@@ -953,8 +953,20 @@ export function createApp({ config, pool, store }) {
         form(
           req,
           "/admin/settings",
-          field("Desk name", "desk_name") +
-            field("Welcome message", "welcome_message") +
+          field(
+            "Desk name",
+            "desk_name",
+            "text",
+            true,
+            req.settings.desk_name,
+          ) +
+            field(
+              "Welcome message",
+              "welcome_message",
+              "text",
+              true,
+              req.settings.welcome_message,
+            ) +
             '<label>Allow guests<input type="checkbox" name="allow_guests" value="1" ' +
             (req.settings.allow_guests === "1" ? "checked" : "") +
             "></label>",

@@ -55,3 +55,13 @@ test("invalid object fields fail before route execution", async () => {
     .send({ email: { bad: true } })
     .expect(400);
 });
+test("session CSRF token round trip reaches authentication handler", async () => {
+  const agent = request.agent(createApp({ config, pool }));
+  const page = await agent.get("/login").expect(200);
+  const _csrf = page.text.match(/name="_csrf" value="([a-f0-9]+)"/)[1];
+  await agent
+    .post("/login")
+    .type("form")
+    .send({ _csrf, email: "nobody@example.com", password: "bad" })
+    .expect(401);
+});
