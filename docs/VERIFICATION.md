@@ -9,3 +9,7 @@ No production deployment, Wisp panel test, Docker image build, browser visual in
 ## Confirmed CI result
 
 [Helpdesk checks run 41344717524](https://github.com/solaristechsvcs/Cosmicdesk/actions/runs/41344717524) passed on commit b67c734208b81486da8c72345d675408abbb4294. All seven tests passed against MySQL 8.4, with no skips. Baseline import, both migration invocations, syntax checks and production dependency audit passed. The integration scenario also checks department transfer, priority changes and clearing the former assignment. Local HTTP/access tests: six passed, with only the MySQL scenario skipped locally.
+
+## Business layout update
+
+Visually inspected the actual ticket queue and conversation templates using synthetic preview data, plus a 390-pixel-wide queue preview. Checked sidebar navigation, compact table, internal-note styling, ticket-property forms and responsive navigation. These previews use sample data, not a live production database. This supersedes the original release's statement that browser visual inspection had not been performed. No schema migration is required for this layout update.

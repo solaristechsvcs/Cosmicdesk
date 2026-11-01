@@ -1,5 +1,13 @@
 import { csrf, staff, hash, canAccess } from "./access.js";
-import { esc, field, form, page } from "./views.js";
+import {
+  esc,
+  field,
+  form,
+  page,
+  badge,
+  dateLabel,
+  ticketTable,
+} from "./views.js";
 import express from "express";
 import session from "express-session";
 
@@ -424,48 +432,37 @@ export function createApp({ config, pool, store }) {
           (pageNo - 1) * 50,
         params,
       );
-      const nav = isStaff
-        ? "<nav>" +
-          ["open", "pending", "closed", "mine", "unassigned", "all"]
-            .map((v) => '<a href="/tickets?queue=' + v + '">' + v + "</a>")
-            .join(" ") +
-          "</nav>"
-        : "";
+
+      const queueNames = {
+        open: "Open tickets",
+        pending: "Pending tickets",
+        closed: "Closed tickets",
+        mine: "Assigned to me",
+        unassigned: "Unassigned tickets",
+        all: "All tickets",
+      };
+      const nav =
+        '<div class="queue-heading"><h2>' +
+        esc(isStaff ? queueNames[queue] || "All tickets" : "Your requests") +
+        '</h2><span class="result-count">' +
+        rows.slice(0, 50).length +
+        " shown · Page " +
+        pageNo +
+        "</span></div>";
       const search =
-        '<form method="get"><input type="hidden" name="queue" value="' +
+        '<form class="queue-search" method="get"><input type="hidden" name="queue" value="' +
         esc(queue) +
-        '"><label>Search subject or ticket number<input name="search" value="' +
+        '"><label for="ticket-search">Search tickets</label><input id="ticket-search" name="search" placeholder="Subject or ticket number" value="' +
         esc(req.query.search || "") +
-        '"></label><button>Search</button></form>';
+        '"><button>Search</button></form>';
       res.send(
         page(
           req,
           isStaff ? "Ticket workspace" : "My tickets",
           nav +
             search +
-            rows
-              .slice(0, 50)
-              .map(
-                (t) =>
-                  '<article><a href="/tickets/' +
-                  t.id +
-                  '">#' +
-                  t.id +
-                  " · " +
-                  esc(t.subject) +
-                  "</a><p>" +
-                  esc(t.department) +
-                  " · " +
-                  esc(t.priority) +
-                  " · " +
-                  esc(t.status) +
-                  " · " +
-                  esc(t.assignee || "Unassigned") +
-                  "</p></article>",
-              )
-              .join("") +
-            (rows.length ? "" : "<p>No tickets in this queue.</p>") +
-            "<nav>" +
+            ticketTable(rows.slice(0, 50)) +
+            '<nav class="pagination" aria-label="Ticket pages">' +
             (pageNo > 1
               ? '<a href="?queue=' +
                 encodeURIComponent(queue) +
@@ -509,17 +506,19 @@ export function createApp({ config, pool, store }) {
         [t.id, staff(req) ? 1 : 0],
       );
       let body =
-        `<p>Department: ${esc(t.department)} · Priority: ${esc(t.priority)} · Status: ${esc(t.status)}</p>` +
+        `<section class="ticket-summary" aria-label="Ticket details"><div><span>Ticket number</span><strong>#${t.id}</strong></div><div><span>Status</span>${badge(t.status)}</div><div><span>Priority</span>${badge(t.priority, "priority")}</div><div><span>Department</span><strong>${esc(t.department)}</strong></div></section><div class="ticket-layout"><section class="conversation"><h2>Conversation</h2>` +
         messages
           .map(
             (m) =>
-              `<article><strong>${esc(m.author_name)} ${m.internal_note ? "(internal note)" : ""}</strong><p class="message">${esc(m.body)}</p>${attachments
+              `<article class="thread-message ${m.internal_note ? "internal-note" : ""}"><div class="message-heading"><strong>${esc(m.author_name)}</strong><span>${m.internal_note ? "Internal note · Staff only" : "Public message"}</span></div><p class="message">${esc(m.body)}</p>${attachments
                 .filter((a) => String(a.message_id) === String(m.id))
                 .map(
                   (a) =>
                     `<p><a href="/tickets/${t.id}/attachments/${a.id}${queryToken}">📎 ${esc(a.filename)}</a></p>`,
                 )
-                .join("")}<small>${esc(m.created_at)}</small></article>`,
+                .join(
+                  "",
+                )}<small>${esc(dateLabel(m.created_at))}</small></article>`,
           )
           .join("");
       if (t.status !== "closed" || staff(req))
@@ -529,6 +528,8 @@ export function createApp({ config, pool, store }) {
           `<input type="hidden" name="token" value="${esc(token)}"><label>Reply<textarea name="body" maxlength="10000" required></textarea></label>${attachmentField}${staff(req) ? '<label><input type="checkbox" name="internal_note" value="1"> Internal note (staff only)</label>' : ""}`,
           true,
         );
+      body +=
+        '</section><aside class="ticket-actions"><h2>Ticket properties</h2>';
       if (staff(req)) {
         const agents = await q(
           "SELECT u.id,u.name FROM users u WHERE u.role='admin' OR (u.role='staff' AND EXISTS (SELECT 1 FROM staff_departments sd WHERE sd.user_id=u.id AND sd.department_id=?)) ORDER BY u.name",
@@ -585,7 +586,8 @@ export function createApp({ config, pool, store }) {
         page(
           req,
           "Ticket #" + t.id + " · " + t.subject,
-          body + `<p><a href="/tickets">Back to tickets</a></p>`,
+          body +
+            `</aside></div><p><a href="/tickets">← Back to tickets</a></p>`,
         ),
       );
     }),
@@ -857,24 +859,22 @@ export function createApp({ config, pool, store }) {
       res.send(
         page(
           req,
-          "Mission control",
-          '<section class="stats">' +
-            rows
+          "Support overview",
+
+          '<section class="stats" aria-label="Ticket status overview">' +
+            statuses
               .map(
-                (r) =>
+                (status) =>
                   "<article><h2>" +
-                  esc(r.total) +
+                  esc(rows.find((r) => r.status === status)?.total || 0) +
                   '</h2><a href="/tickets?queue=' +
-                  esc(r.status) +
+                  status +
                   '">' +
-                  esc(r.status) +
-                  " tickets</a></article>",
+                  status +
+                  " tickets →</a></article>",
               )
               .join("") +
-            '</section><a class="button" href="/tickets">Open workspace</a>' +
-            (req.session.user.role === "admin"
-              ? '<nav><a href="/admin/users">People & roles</a><a href="/admin/departments">Departments</a><a href="/admin/topics">Help topics</a><a href="/admin/settings">Configuration</a><a href="/admin/audit">Audit log</a></nav>'
-              : ""),
+            '</section><section class="overview-actions"><article><h2>Keep your queue moving</h2><p>Review new requests, follow up on pending conversations, and resolve tickets from your workspace.</p><a class="button" href="/tickets?queue=open">View open tickets</a></article><article><h2>Your next assignment</h2><p>Pick up an unassigned request or continue working on tickets already assigned to you.</p><a class="button secondary" href="/tickets?queue=mine">Assigned to me</a> <a class="text-action" href="/tickets?queue=unassigned">Unassigned tickets →</a></article></section>',
         ),
       );
     }),
