@@ -824,3 +824,191 @@ footer span {
   font-size: 12px;
   margin: 12px 0 0 10px;
 }
+
+/* Theme toggle is shared by the staff workspace and customer portal. */
+.theme-toggle {
+  background: transparent;
+  color: #536078;
+  border-color: var(--border);
+  padding: 7px 10px;
+  font-size: 12px;
+  gap: 7px;
+}
+.theme-toggle:hover {
+  background: #f0edf9;
+  color: #514196;
+}
+.theme-toggle[hidden] {
+  display: none;
+}
+.theme-toggle span[aria-hidden] {
+  font-size: 16px;
+  line-height: 1;
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  color: #d8e1ef;
+  background: #101725;
+  --accent: #7158b8;
+  --border: #344157;
+  --muted: #a3b0c5;
+  --navy: #111b2d;
+}
+[data-theme="dark"] a {
+  color: #bca9f6;
+}
+[data-theme="dark"] .topbar,
+[data-theme="dark"] article,
+[data-theme="dark"] .hero,
+[data-theme="dark"] form,
+[data-theme="dark"] .queue-heading,
+[data-theme="dark"] .table-scroll,
+[data-theme="dark"] .ticket-summary {
+  background: #1a2435;
+}
+[data-theme="dark"] .brand,
+[data-theme="dark"] h1,
+[data-theme="dark"] h2,
+[data-theme="dark"] .subject a,
+[data-theme="dark"] .empty-state strong {
+  color: #edf1fa;
+}
+[data-theme="dark"] .brand-mark {
+  background: #32294d;
+  color: #c1aaf8;
+}
+[data-theme="dark"] .sidebar a {
+  color: #bdc9dc;
+}
+[data-theme="dark"] .sidebar a:hover {
+  background: #25334b;
+  color: #fff;
+}
+[data-theme="dark"] .sidebar a[aria-current] {
+  background: #5d4c9e;
+  color: #fff;
+}
+[data-theme="dark"] .account-nav form {
+  background: transparent;
+}
+[data-theme="dark"] .account-nav button,
+[data-theme="dark"] .theme-toggle,
+[data-theme="dark"] .button.secondary,
+[data-theme="dark"] .queue-search button {
+  background: #222f44;
+  color: #d4dcf0;
+  border-color: #44526c;
+}
+[data-theme="dark"] .theme-toggle:hover,
+[data-theme="dark"] .account-nav button:hover,
+[data-theme="dark"] .queue-search button:hover,
+[data-theme="dark"] .button.secondary:hover {
+  background: #303f58;
+}
+[data-theme="dark"] .product-label,
+[data-theme="dark"] .account-name small,
+[data-theme="dark"] .page-heading p,
+[data-theme="dark"] p,
+[data-theme="dark"] .result-count,
+[data-theme="dark"] .stats a {
+  color: #a3b0c5;
+}
+[data-theme="dark"] .breadcrumb,
+[data-theme="dark"] .ticket-table th,
+[data-theme="dark"] .ticket-summary > div > span:first-child,
+[data-theme="dark"] .message-heading span,
+[data-theme="dark"] small,
+[data-theme="dark"] footer {
+  color: #a2afc4;
+}
+[data-theme="dark"] label {
+  color: #c5cfe0;
+}
+[data-theme="dark"] input,
+[data-theme="dark"] select,
+[data-theme="dark"] textarea {
+  background: #111b2c;
+  border-color: #42516b;
+  color: #e1e8f4;
+}
+[data-theme="dark"] input::placeholder,
+[data-theme="dark"] textarea::placeholder {
+  color: #8d9bb3;
+}
+[data-theme="dark"] article > form,
+[data-theme="dark"] .queue-search,
+[data-theme="dark"] .ticket-table th,
+[data-theme="dark"] .message-heading {
+  background: #162031;
+}
+[data-theme="dark"] .form-actions,
+[data-theme="dark"] .ticket-table td,
+[data-theme="dark"] .message-heading {
+  border-color: #344157;
+}
+[data-theme="dark"] .ticket-table td,
+[data-theme="dark"] .thread-message .message {
+  color: #c0cce0;
+}
+[data-theme="dark"] .ticket-table tbody tr:hover {
+  background: #222c41;
+}
+[data-theme="dark"] .date {
+  color: #a2afc4 !important;
+}
+[data-theme="dark"] .badge {
+  background: #2d3b51;
+  color: #c2cfe1;
+}
+[data-theme="dark"] .status-open {
+  background: #193f34;
+  color: #9cdfbc;
+}
+[data-theme="dark"] .status-pending {
+  background: #473b22;
+  color: #f0cc80;
+}
+[data-theme="dark"] .status-closed,
+[data-theme="dark"] .priority-low {
+  background: #2d3b51;
+  color: #bdcbe0;
+}
+[data-theme="dark"] .priority-urgent {
+  background: #4d2834;
+  color: #ffa9b7;
+}
+[data-theme="dark"] .priority-high {
+  background: #493723;
+  color: #f5c58c;
+}
+[data-theme="dark"] .priority-normal {
+  background: #353158;
+  color: #d0bff8;
+}
+[data-theme="dark"] .internal-note {
+  border-color: #6a5831;
+}
+[data-theme="dark"] .internal-note .message-heading {
+  background: #352f20;
+  border-color: #6a5831;
+}
+[data-theme="dark"] .internal-note .message-heading span {
+  color: #e7c785;
+}
+[data-theme="dark"] .skip-link {
+  background: #1a2435;
+  color: #fff;
+}
+@media (max-width: 640px) {
+  .account-nav {
+    gap: 9px;
+  }
+  .theme-toggle {
+    font-size: 11px;
+    padding: 7px 8px;
+  }
+}
+
+[data-theme="dark"] .button:not(.secondary) {
+  color: #fff;
+}

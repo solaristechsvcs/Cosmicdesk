@@ -39,3 +39,5 @@ The staff workspace now uses a light business layout with a navy sidebar, persis
 ## Restart updates
 
 Wisp's `node server.js` entrypoint now updates application source from this repository's main branch on restart, preserves private configuration/runtime data, installs production dependencies and applies pending migrations before launching. Replace server.js once on an existing installation to enable it. Set COSMICDESK_AUTO_UPDATE=0 to pin the installed code. See the [restart updater details](docs/DEPLOYMENT.md#automatic-updates-on-wisp-restarts) for requirements and failure behavior. Docker image updates remain build-based.
+
+Use the header’s Light mode / Dark mode button to switch appearance instantly. The browser remembers your choice; until you choose a mode, the interface follows your system preference. This works on staff and customer pages and needs no database migration.

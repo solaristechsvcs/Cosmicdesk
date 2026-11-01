@@ -24,3 +24,4 @@ MySQL regression coverage reproduces an existing help_topic_id column with missi
 
 Attachment download regression tests verify original filename/extension, spaces, Unicode, escaped quotes, unchanged bytes, stripped path/control characters, guest authorization and internal-note privacy. The MySQL workflow also verifies private.txt downloads with its stored name and original content.
 
+Theme toggle visually checked on the actual staff ticket template using sample data: dark/light appearance, header action, and persistence after page reload. Theme preference is browser-local and external script loading remains within the existing Content Security Policy.
