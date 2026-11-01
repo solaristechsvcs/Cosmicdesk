@@ -52,7 +52,7 @@ test(
       assert.equal(ledger.count, 2);
       // Recover fully existing tables whose ledger row was lost; preserve admin choices.
       await db.query(
-        "DELETE FROM schema_migrations WHERE version='002_helpdesk.sql'; DELETE FROM staff_departments WHERE department_id!=2; UPDATE settings SET setting_value='My business' WHERE setting_key='desk_name'; UPDATE help_topics SET name='Custom topic' WHERE id=1; ALTER TABLE tickets DROP FOREIGN KEY fk_ticket_topic; DROP INDEX idx_queue ON tickets",
+        "DELETE FROM schema_migrations WHERE version='002_helpdesk.sql'; DELETE FROM staff_departments WHERE department_id!=2; UPDATE settings SET setting_value='My business' WHERE setting_key='desk_name'; UPDATE help_topics SET name='Custom topic' WHERE id=1; ALTER TABLE tickets DROP FOREIGN KEY fk_ticket_topic; CREATE INDEX recovery_department ON tickets(department_id); DROP INDEX idx_queue ON tickets",
       );
       await migrate(db, { log: () => {} });
       const [restricted] = await db.query(
@@ -99,3 +99,4 @@ test(
     }
   },
 );
+
