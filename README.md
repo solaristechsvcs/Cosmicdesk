@@ -35,3 +35,7 @@ Attachments use client-declared MIME filtering, not malware scanning or content 
 ## Business workspace layout
 
 The staff workspace now uses a light business layout with a navy sidebar, persistent queue/admin navigation, compact ticket tables, status/priority badges and a split conversation/properties view. The customer portal uses the same visual language with simpler navigation. CosmicDesk's purple accents and original identity remain. This interface update needs no database migration: update the application files, restart Node and reload the browser. The stylesheet URL is versioned to avoid stale cached styling.
+
+## Restart updates
+
+Wisp's `node server.js` entrypoint now updates application source from this repository's main branch on restart, preserves private configuration/runtime data, installs production dependencies and applies pending migrations before launching. Replace server.js once on an existing installation to enable it. Set COSMICDESK_AUTO_UPDATE=0 to pin the installed code. See the [restart updater details](docs/DEPLOYMENT.md#automatic-updates-on-wisp-restarts) for requirements and failure behavior. Docker image updates remain build-based.

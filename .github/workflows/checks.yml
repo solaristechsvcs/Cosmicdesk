@@ -34,4 +34,18 @@ jobs:
       - run: npm test
         env:
           TEST_MYSQL: '1'
+      - name: Smoke test Wisp restart entrypoint
+        env:
+          COSMICDESK_AUTO_UPDATE: '0'
+          DB_USER: root
+          DB_PASSWORD: testroot
+          SESSION_SECRET: ci-only-secret-that-is-at-least-32-characters
+        run: |
+          node server.js &
+          app_pid=$!
+          trap 'kill "$app_pid" 2>/dev/null || true' EXIT
+          curl --fail --retry 20 --retry-connrefused --retry-delay 1 http://127.0.0.1:3014/health
+          curl --fail http://127.0.0.1:3014/login | grep 'name="_csrf"'
+          kill "$app_pid"
+          wait "$app_pid"
       - run: npm audit --omit=dev

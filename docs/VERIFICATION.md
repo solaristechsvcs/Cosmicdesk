@@ -13,3 +13,7 @@ No production deployment, Wisp panel test, Docker image build, browser visual in
 ## Business layout update
 
 Visually inspected the actual ticket queue and conversation templates using synthetic preview data, plus a 390-pixel-wide queue preview. Checked sidebar navigation, compact table, internal-note styling, ticket-property forms and responsive navigation. These previews use sample data, not a live production database. This supersedes the original release's statement that browser visual inspection had not been performed. No schema migration is required for this layout update.
+
+## Restart updater verification
+
+Updater tests cover protected paths, staging without Git, retaining configuration/environment/uploads, skipping unchanged revisions, checksum and dependency failures, invalid trees/destinations, overlapping update locks, offline fallback, migration failure and source/dependency rollback on activation failure. GitHub CI also smoke-tests the real Node restart entrypoint against MySQL with network updating disabled; it checks health and login-page delivery. Live Wisp restarts are not tested from this workspace.
