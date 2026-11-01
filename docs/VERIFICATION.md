@@ -21,3 +21,6 @@ Updater tests cover protected paths, staging without Git, retaining configuratio
 ## Partial migration recovery
 
 MySQL regression coverage reproduces an existing help_topic_id column with missing migration history, verifies recovery and repeat runs, and checks preservation of ticket content, guest token hashes, attachment bytes, custom topics/settings and restricted staff membership. It also removes/recreates missing FK/index objects and confirms that incompatible existing column definitions fail without recording migration completion. Tests use a separate disposable recovery database.
+
+Attachment download regression tests verify original filename/extension, spaces, Unicode, escaped quotes, unchanged bytes, stripped path/control characters, guest authorization and internal-note privacy. The MySQL workflow also verifies private.txt downloads with its stored name and original content.
+

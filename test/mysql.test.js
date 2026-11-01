@@ -118,7 +118,12 @@ test(
         /href="([^\"]+\/attachments\/\d+)"/,
       )[1];
       await customer.get(attachment).expect(404);
-      await staff.get(attachment).expect(200);
+      const download = await staff.get(attachment).expect(200);
+      assert.match(
+        download.headers["content-disposition"],
+        /filename="private\.txt"/,
+      );
+      assert.equal(download.body.toString(), "private file");
       assert.equal(
         (await post(staff, path + "/assign", { staff_id: "2" })).status,
         302,

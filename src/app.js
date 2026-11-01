@@ -647,9 +647,25 @@ export function createApp({ config, pool, store }) {
       );
       if (!a || (a.internal_note && !staff(req)))
         return fail(res, req, "Attachment not found", 404);
+      const filename =
+        String(a.filename || "attachment")
+          .replaceAll("\\", "/")
+          .split("/")
+          .pop()
+          .replace(/[\u0000-\u001f\u007f]/g, "")
+          .trim() || "attachment";
+      // ASCII fallback plus RFC 5987 UTF-8 name keeps extensions and non-English names.
+      res.attachment(filename.replace(/[^\x20-\x7e]/g, "_"));
+      const encodedName = encodeURIComponent(filename).replace(
+        /[!'()*]/g,
+        (char) => "%" + char.charCodeAt(0).toString(16).toUpperCase(),
+      );
+      res.set(
+        "Content-Disposition",
+        res.get("Content-Disposition") + "; filename*=UTF-8''" + encodedName,
+      );
       res.set({
         "Content-Type": "application/octet-stream",
-        "Content-Disposition": 'attachment; filename="download"',
         "X-Content-Type-Options": "nosniff",
         "Cache-Control": "private, no-store",
       });
