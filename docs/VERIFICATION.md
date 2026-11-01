@@ -17,3 +17,7 @@ Visually inspected the actual ticket queue and conversation templates using synt
 ## Restart updater verification
 
 Updater tests cover protected paths, staging without Git, retaining configuration/environment/uploads, skipping unchanged revisions, checksum and dependency failures, invalid trees/destinations, overlapping update locks, offline fallback, migration failure and source/dependency rollback on activation failure. GitHub CI also smoke-tests the real Node restart entrypoint against MySQL with network updating disabled; it checks health and login-page delivery. Live Wisp restarts are not tested from this workspace.
+
+## Partial migration recovery
+
+MySQL regression coverage reproduces an existing help_topic_id column with missing migration history, verifies recovery and repeat runs, and checks preservation of ticket content, guest token hashes, attachment bytes, custom topics/settings and restricted staff membership. It also removes/recreates missing FK/index objects and confirms that incompatible existing column definitions fail without recording migration completion. Tests use a separate disposable recovery database.
